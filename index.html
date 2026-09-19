@@ -73,6 +73,21 @@
   .ruta.pasada { opacity:.42; }
   .ruta.siguiente { background:color-mix(in srgb,var(--acento) 11%,transparent); border-radius:12px; border-bottom-color:transparent; }
 
+  .cal {
+    flex:0 0 auto; margin-left:auto; align-self:center;
+    background:none; border:0; padding:6px; cursor:pointer; color:var(--acento);
+    border-radius:50%; line-height:0;
+  }
+  .cal svg { width:19px; height:19px; stroke:currentColor; fill:none; stroke-width:1.7; }
+  .cal:active { background:color-mix(in srgb,var(--acento) 18%,transparent); }
+  .ruta.pasada .cal { display:none; }
+  .compartir { text-align:center; margin:22px 0 0; }
+  .compartir a {
+    display:inline-flex; align-items:center; gap:8px; text-decoration:none;
+    font-weight:600; font-size:.92rem; color:var(--verde);
+    background:var(--papel2); border:1px solid var(--linea); border-radius:99px; padding:9px 18px;
+  }
+  .compartir svg { width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:1.8; }
   .guardar { text-align:center; margin:26px 0 0; }
   .guardar button {
     font:inherit; font-weight:600; font-size:.92rem; color:var(--verde);
@@ -221,10 +236,17 @@
     </ul>
   </section>
 
+  <div class="compartir">
+    <a id="wa" href="#" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="10.5" x2="15.4" y2="6.5"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/></svg>
+      Compartir por WhatsApp
+    </a>
+  </div>
+
   <div class="guardar" id="guardar">
     <button type="button" id="btn-guardar">
       <svg viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-      Añadir acceso directo
+      Guardar en mi móvil
     </button>
     <p class="pasos" id="pasos"></p>
   </div>
@@ -284,6 +306,51 @@
   if (window.matchMedia('(display-mode: standalone)').matches || navigator.standalone) {
     caja.style.display = 'none';
   }
+
+  // enlace de WhatsApp
+  var wa = document.getElementById('wa');
+  if (wa) {
+    wa.href = 'https://wa.me/?text=' + encodeURIComponent(
+      'Calendario de rutas de Andariegos Coseranos 2026-2027: ' + location.href);
+  }
+
+  // botón de calendario en cada ruta
+  function ics(nombre, iso) {
+    var d = iso.replace(/-/g, '');
+    var f = new Date(iso + 'T00:00:00');
+    f.setDate(f.getDate() + 1);
+    var fin = f.getFullYear() + String(f.getMonth()+1).padStart(2,'0') + String(f.getDate()).padStart(2,'0');
+    return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Andariegos Coseranos//ES',
+      'BEGIN:VEVENT','UID:' + d + '@rutasac','DTSTAMP:' + d + 'T080000Z',
+      'DTSTART;VALUE=DATE:' + d, 'DTEND;VALUE=DATE:' + fin,
+      'SUMMARY:Ruta: ' + nombre,
+      'DESCRIPTION:Andariegos Coseranos. Hora y punto de salida se confirman en los dias previos.',
+      'BEGIN:VALARM','TRIGGER:-P1D','ACTION:DISPLAY','DESCRIPTION:Ruta manana',
+      'END:VALARM','END:VEVENT','END:VCALENDAR'].join('\r\n');
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('.ruta'), function (li) {
+    if (li.classList.contains('pasada')) return;
+    var b = document.createElement('button');
+    b.className = 'cal';
+    b.type = 'button';
+    b.title = 'Añadir al calendario';
+    b.setAttribute('aria-label', 'Añadir al calendario');
+    b.innerHTML = '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/>' +
+                  '<line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/>' +
+                  '<line x1="16" y1="3" x2="16" y2="7"/><line x1="12" y1="13" x2="12" y2="18"/>' +
+                  '<line x1="9.5" y1="15.5" x2="14.5" y2="15.5"/></svg>';
+    b.addEventListener('click', function () {
+      var nombre = li.querySelector('.nombre').textContent.trim();
+      var blob = new Blob([ics(nombre, li.dataset.date)], {type: 'text/calendar;charset=utf-8'});
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'ruta-' + li.dataset.date + '.ics';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+    });
+    li.appendChild(b);
+  });
 
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function () {
