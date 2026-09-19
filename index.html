@@ -342,10 +342,25 @@
                   '<line x1="9.5" y1="15.5" x2="14.5" y2="15.5"/></svg>';
     b.addEventListener('click', function () {
       var nombre = li.querySelector('.nombre').textContent.trim();
-      var blob = new Blob([ics(nombre, li.dataset.date)], {type: 'text/calendar;charset=utf-8'});
+      var iso = li.dataset.date;
+      var d = iso.replace(/-/g, '');
+      var f = new Date(iso + 'T00:00:00'); f.setDate(f.getDate() + 1);
+      var fin = f.getFullYear() + String(f.getMonth()+1).padStart(2,'0') + String(f.getDate()).padStart(2,'0');
+      var desc = 'Andariegos Coseranos. La hora y el punto de salida se confirman en los dias previos.';
+
+      if (!ios) {
+        // Android: se abre Google Calendar con el evento ya escrito
+        window.open('https://calendar.google.com/calendar/render?action=TEMPLATE' +
+          '&text=' + encodeURIComponent('Ruta: ' + nombre) +
+          '&dates=' + d + '/' + fin +
+          '&details=' + encodeURIComponent(desc), '_blank', 'noopener');
+        return;
+      }
+      // iPhone: el archivo .ics lo abre el calendario directamente
+      var blob = new Blob([ics(nombre, iso)], {type: 'text/calendar;charset=utf-8'});
       var a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = 'ruta-' + li.dataset.date + '.ics';
+      a.download = 'ruta-' + iso + '.ics';
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
       setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
     });
