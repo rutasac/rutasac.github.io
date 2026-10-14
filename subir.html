@@ -104,10 +104,6 @@
     </p>
     <p class="nota">La foto se ve en la web en unos minutos. Si subes otra más tarde, se queda la última.</p>
 
-    <hr class="separador">
-    <p class="centro">
-      <button class="discreto" id="quitar">Me he liado, quitar el cartel que hay puesto</button>
-    </p>
   </section>
 
   <!-- 3. resultado -->
@@ -117,6 +113,11 @@
       <a class="grande" href="./" style="text-decoration:none">Ver la web de las rutas</a>
     </p>
   </section>
+
+  <hr class="separador">
+  <p class="centro" id="zona-quitar">
+    <button class="discreto" id="quitar">Me he liado, quitar el cartel que hay puesto</button>
+  </p>
 
   <footer>Andariegos Coseranos</footer>
 </div>
@@ -219,6 +220,7 @@
       .then(function (r) {
         if (r.ok) {
           $('fin-texto').textContent = '¡Listo! El cartel saldrá en la web en unos minutos.';
+          $('zona-quitar').style.display = 'none';
           mostrar('paso-fin');
           return;
         }
@@ -242,17 +244,18 @@
     var b = this;
     b.disabled = true;
     b.textContent = 'Quitando…';
-    enviar({ accion: 'quitar', pase: pase })
+    enviar({ accion: 'quitar' })
       .then(function (r) {
         if (r.ok) {
           $('fin-texto').textContent = 'Hecho. La web se queda sin cartel hasta que subáis otro.';
+          $('zona-quitar').style.display = 'none';
           mostrar('paso-fin');
           return;
         }
         b.disabled = false;
         b.textContent = 'Me he liado, quitar el cartel que hay puesto';
-        alert(r.error === 'nada' ? 'No hay ningún cartel puesto ahora mismo.'
-            : r.error === 'pase' ? 'Ha pasado mucho rato. Vuelve a entrar y responde otra vez.'
+        alert(r.error === 'nada'   ? 'No hay ningún cartel puesto ahora mismo.'
+            : r.error === 'limite' ? 'Se ha quitado el cartel varias veces seguidas. Prueba dentro de un rato.'
             : 'No se ha podido quitar. Inténtalo de nuevo.');
       })
       .catch(function () {

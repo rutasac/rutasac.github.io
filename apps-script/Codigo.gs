@@ -170,11 +170,17 @@ function subir(d) {
 /**
  * Retira el cartel que se está mostrando. No borra el historial:
  * quita el último archivo subido, y la web deja de enseñar nada
- * hasta que alguien suba otro.
+ * hasta que alguien suba otro. No hace falta responder la pregunta.
  */
 function quitar(d) {
-  if (!d.pase || cache().get('pase-' + d.pase) !== '1') return responder({ error: 'pase' });
-  cache().remove('pase-' + d.pase);
+  // A propósito NO se pide la pregunta: quitar el cartel no hace daño
+  // (la web se queda sin cartel y se arregla subiendo otro), y quien
+  // ve algo raro debe poder quitarlo al momento, sin exámenes.
+  // Solo se limita la repetición, para que nadie se entretenga.
+  var c = cache();
+  var veces = Number(c.get('quitados') || 0);
+  if (veces >= 5) return responder({ error: 'limite' });
+  c.put('quitados', String(veces + 1), 3600);
 
   var props = PropertiesService.getScriptProperties();
   var repo  = props.getProperty('REPO');
