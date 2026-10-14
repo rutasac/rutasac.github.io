@@ -19,7 +19,7 @@ var PREGUNTAS = [
     ok: 'Los Paredones',
     no: ['la piscina', 'la granja', 'el helipuerto', 'el puerto', 'la playa'] },
 
-  { t: 'La fuente Jorda, cuando llueve…',
+  { t: 'La fuente Jordana, cuando llueve…',
     ok: 'mana',
     no: ['gana', 'lana', 'sana', 'se cierra', 'se agarra'] },
 
