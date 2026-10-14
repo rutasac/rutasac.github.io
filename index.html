@@ -67,15 +67,14 @@
   .proxima h3 { margin:0 0 4px; font-size:.78rem; letter-spacing:.18em; text-transform:uppercase; color:var(--acento); font-weight:700; }
   .proxima p { margin:0; font-size:1.15rem; font-weight:700; color:var(--marron); }
   .proxima small { display:block; color:var(--suave); font-weight:600; margin-top:2px; }
+  .proxima .cartel { margin:13px 0 0; }
+  .proxima .cartel img { display:block; width:100%; height:auto; border-radius:12px; border:1px solid var(--linea); }
 
   .mes { margin:0 0 20px; }
   .mes h2 { font-size:1.22rem; color:var(--marron); margin:0 0 6px; font-weight:700;
              border-bottom:1px solid var(--linea); padding-bottom:4px; }
   ul { list-style:none; margin:0; padding:0; }
-  .ruta { display:flex; flex-wrap:wrap; gap:14px; align-items:flex-start; padding:9px 4px; border-bottom:1px dotted var(--linea); }
-  .cartel { flex:0 0 100%; margin:2px 0 0; }
-  .cartel img { display:block; width:100%; height:auto; border-radius:14px; border:1px solid var(--linea); }
-  .ruta.pasada .cartel { display:none; }
+  .ruta { display:flex; gap:14px; align-items:flex-start; padding:9px 4px; border-bottom:1px dotted var(--linea); }
   .ruta:last-child { border-bottom:0; }
   .fecha { flex:0 0 46px; text-align:center; line-height:1; padding-top:2px; }
   .fecha b { display:block; font-size:1.35rem; color:var(--verde); font-weight:700; }
@@ -131,6 +130,10 @@
     <h3>Próxima ruta</h3>
     <p id="prox-nombre"></p>
     <small id="prox-fecha"></small>
+    <figure class="cartel" id="cartel" data-for="2026-10-18">
+      <img src="ruta-18-oct.jpg" width="720" height="548"
+           alt="Ruta Bacoco – La Lamparona, 6 km. Salida de la Plaza del Ayuntamiento a las 9:30. Picoteo: frutos secos, chocolate, fruta.">
+    </figure>
   </div>
 
   <section class="mes">
@@ -147,10 +150,6 @@
       <li class="ruta" data-date="2026-10-18">
         <div class="fecha"><b>18</b><span>dom</span></div>
         <div class="txt"><p class="nombre">Bacoco – La Lamparona</p></div>
-        <figure class="cartel">
-          <img src="ruta-18-oct.jpg" loading="lazy" width="720" height="548"
-               alt="Ruta Bacoco – La Lamparona, 6 km. Salida de la Plaza del Ayuntamiento a las 9:30. Picoteo: frutos secos, chocolate, fruta.">
-        </figure>
       </li>
     </ul>
   </section>
@@ -284,11 +283,7 @@
   items.forEach(function (li) {
     var p = li.dataset.date.split('-');
     var f = new Date(+p[0], +p[1]-1, +p[2]);
-    if (f < hoy) {
-      li.classList.add('pasada');
-      var cartel = li.querySelector('.cartel');
-      if (cartel) cartel.remove();
-    }
+    if (f < hoy) li.classList.add('pasada');
     else if (!sig) { sig = { li: li, f: f }; }
   });
   if (sig) {
@@ -301,6 +296,8 @@
     document.getElementById('prox-fecha').textContent =
       fmt.charAt(0).toUpperCase() + fmt.slice(1) +
       (dias === 0 ? ' · ¡hoy!' : dias === 1 ? ' · mañana' : ' · faltan ' + dias + ' días');
+    var cartel = document.getElementById('cartel');
+    if (cartel && cartel.dataset.for !== sig.li.dataset.date) cartel.remove();
     caja.hidden = false;
   }
 })();
@@ -387,8 +384,7 @@
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
       setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
     });
-    var fig = li.querySelector('.cartel');
-    if (fig) li.insertBefore(b, fig); else li.appendChild(b);
+    li.appendChild(b);
   });
 
   if ('serviceWorker' in navigator) {
