@@ -130,9 +130,8 @@
     <h3>Próxima ruta</h3>
     <p id="prox-nombre"></p>
     <small id="prox-fecha"></small>
-    <figure class="cartel" id="cartel" data-for="2026-10-18">
-      <img src="ruta-18-oct.jpg" width="720" height="548"
-           alt="Ruta Bacoco – La Lamparona, 6 km. Salida de la Plaza del Ayuntamiento a las 9:30. Picoteo: frutos secos, chocolate, fruta.">
+    <figure class="cartel" id="cartel" hidden>
+      <img id="cartel-img" alt="Cartel con los detalles de la próxima ruta">
     </figure>
   </div>
 
@@ -279,11 +278,11 @@
 (function () {
   var hoy = new Date(); hoy.setHours(0,0,0,0);
   var items = Array.prototype.slice.call(document.querySelectorAll('.ruta'));
-  var sig = null;
+  var sig = null, previa = null;
   items.forEach(function (li) {
     var p = li.dataset.date.split('-');
     var f = new Date(+p[0], +p[1]-1, +p[2]);
-    if (f < hoy) li.classList.add('pasada');
+    if (f < hoy) { li.classList.add('pasada'); previa = f; }
     else if (!sig) { sig = { li: li, f: f }; }
   });
   if (sig) {
@@ -296,9 +295,53 @@
     document.getElementById('prox-fecha').textContent =
       fmt.charAt(0).toUpperCase() + fmt.slice(1) +
       (dias === 0 ? ' · ¡hoy!' : dias === 1 ? ' · mañana' : ' · faltan ' + dias + ' días');
-    var cartel = document.getElementById('cartel');
-    if (cartel && cartel.dataset.for !== sig.li.dataset.date) cartel.remove();
     caja.hidden = false;
+    buscarCartel(previa);
+  }
+
+  // Busca en GitHub el último cartel subido a la carpeta /carteles.
+  // Solo lo muestra si se subió DESPUÉS de la última ruta celebrada,
+  // así el de un mes anterior no se queda colgado.
+  function buscarCartel(previa) {
+    var fig = document.getElementById('cartel');
+    var img = document.getElementById('cartel-img');
+    if (!fig || !img) return;
+    var API = 'https://api.github.com/repos/rutasac/rutasac.github.io';
+    var CLAVE = 'cartel-v1', VIGENCIA = 3600000;
+
+    function pintar(info) {
+      if (!info || !info.path) return;
+      if (previa && new Date(info.date) < previa) return;
+      img.src = info.path.split('/').map(encodeURIComponent).join('/');
+      img.onload = function () { fig.hidden = false; };
+    }
+
+    var cache = null;
+    try { cache = JSON.parse(localStorage.getItem(CLAVE) || 'null'); } catch (e) {}
+    if (cache && Date.now() - cache.fetchedAt < VIGENCIA) { pintar(cache); return; }
+
+    fetch(API + '/commits?path=carteles&per_page=1')
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (cs) {
+        if (!cs || !cs.length) return null;
+        var c = cs[0];
+        return fetch(API + '/commits/' + c.sha)
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (d) {
+            if (!d || !d.files) return null;
+            var f = d.files.filter(function (x) {
+              return x.status !== 'removed' &&
+                     /^carteles\/.+\.(jpe?g|png|webp|gif)$/i.test(x.filename);
+            })[0];
+            return f ? { path: f.filename, date: c.commit.committer.date, fetchedAt: Date.now() } : null;
+          });
+      })
+      .then(function (info) {
+        if (!info) return;
+        try { localStorage.setItem(CLAVE, JSON.stringify(info)); } catch (e) {}
+        pintar(info);
+      })
+      .catch(function () {});
   }
 })();
 </script>

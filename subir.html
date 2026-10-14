@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Subir el cartel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&display=swap" rel="stylesheet">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#faf6ea">
+<style>
+  :root {
+    --papel:#faf6ea; --papel2:#f2ecda; --tinta:#3f342a; --suave:#6b5c4a;
+    --marron:#56381f; --verde:#2f5a4e; --linea:#d9cdb4; --acento:#7d8f5c;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --papel:#1c1915; --papel2:#252019; --tinta:#efe6d4; --suave:#b9ab95;
+      --marron:#d9b087; --verde:#8fc0ab; --linea:#3b342a; --acento:#9bb073;
+    }
+  }
+  :root[data-theme="dark"] {
+    --papel:#1c1915; --papel2:#252019; --tinta:#efe6d4; --suave:#b9ab95;
+    --marron:#d9b087; --verde:#8fc0ab; --linea:#3b342a; --acento:#9bb073;
+  }
+  * { box-sizing:border-box; }
+  body {
+    margin:0; background:var(--papel); color:var(--tinta);
+    font-family:"Baloo 2","Trebuchet MS",system-ui,sans-serif;
+    font-size:19px; line-height:1.45; -webkit-text-size-adjust:100%;
+  }
+  .wrap { max-width:620px; margin:0 auto; padding:30px 20px 60px; }
+
+  h1 { font-size:clamp(1.7rem,7vw,2.2rem); line-height:1.1; margin:0 0 6px; color:var(--marron); font-weight:800; }
+  .sub { margin:0 0 26px; color:var(--suave); font-weight:600; }
+
+  ol { counter-reset:paso; list-style:none; margin:0; padding:0; }
+  ol li {
+    counter-increment:paso; position:relative;
+    padding:0 0 22px 56px; margin:0;
+  }
+  ol li::before {
+    content:counter(paso); position:absolute; left:0; top:-2px;
+    width:38px; height:38px; border-radius:50%;
+    background:var(--papel2); border:1px solid var(--linea);
+    color:var(--verde); font-weight:700; font-size:1.05rem;
+    display:flex; align-items:center; justify-content:center;
+  }
+  ol li b { color:var(--marron); }
+
+  .boton { text-align:center; margin:14px 0 30px; }
+  .boton a {
+    display:inline-block; text-decoration:none; font-weight:700; font-size:1.12rem;
+    color:var(--papel); background:var(--verde);
+    border-radius:99px; padding:16px 30px; line-height:1.2;
+  }
+
+  .aviso {
+    background:var(--papel2); border:1px solid var(--linea); border-radius:16px;
+    padding:16px 18px; margin:0 0 24px;
+  }
+  .aviso h2 { margin:0 0 6px; font-size:.78rem; letter-spacing:.16em; text-transform:uppercase; color:var(--acento); font-weight:700; }
+  .aviso p { margin:0 0 8px; font-size:.95rem; }
+  .aviso p:last-child { margin-bottom:0; }
+
+  footer { margin-top:30px; text-align:center; font-size:.85rem; color:var(--suave); }
+  footer a { color:var(--verde); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Subir el cartel de la próxima ruta</h1>
+  <p class="sub">La foto aparecerá arriba del todo en la web de las rutas.</p>
+
+  <div class="boton">
+    <a href="https://github.com/rutasac/rutasac.github.io/upload/main/carteles"
+       target="_blank" rel="noopener">Subir el cartel</a>
+  </div>
+
+  <ol>
+    <li>Pulsa el botón verde de arriba. Si te pide usuario y contraseña, son los de <b>GitHub</b>.</li>
+    <li>Arrastra la foto del cartel, o pulsa <b>“choose your files”</b> y búscala en el móvil.</li>
+    <li>Baja hasta el final y pulsa el botón verde <b>“Commit changes”</b>.</li>
+  </ol>
+
+  <div class="aviso">
+    <h2>Tres cosas que no hace falta hacer</h2>
+    <p>No hay que cambiarle el nombre a la foto. Vale tal cual sale del móvil.</p>
+    <p>No hay que borrar el cartel anterior. Se queda guardado y deja de mostrarse solo.</p>
+    <p>No hay que avisar a nadie. En unos minutos sale en la web.</p>
+  </div>
+
+  <div class="aviso">
+    <h2>Si algo sale mal</h2>
+    <p>¿Subiste la foto equivocada? Vuelve a entrar y sube la buena: la web muestra siempre la última.</p>
+    <p>El cartel desaparece solo cuando pasa el día de la ruta.</p>
+  </div>
+
+  <footer>
+    <p><a href="./">Ver la web de las rutas</a></p>
+    <p>Andariegos Coseranos</p>
+  </footer>
+
+</div>
+</body>
+</html>
