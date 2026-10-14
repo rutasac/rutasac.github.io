@@ -69,6 +69,13 @@
   footer { margin-top:30px; text-align:center; font-size:.85rem; color:var(--suave); }
   footer a { color:var(--verde); }
   input[type=file] { display:none; }
+  .discreto {
+    font:inherit; font-size:.92rem; font-weight:600;
+    background:none; border:0; color:var(--suave);
+    text-decoration:underline; text-underline-offset:3px;
+    cursor:pointer; padding:10px;
+  }
+  .separador { border:0; border-top:1px solid var(--linea); margin:26px 0 4px; }
 </style>
 </head>
 <body>
@@ -96,6 +103,11 @@
       <button class="grande" id="enviar">Subir el cartel</button>
     </p>
     <p class="nota">La foto se ve en la web en unos minutos. Si subes otra más tarde, se queda la última.</p>
+
+    <hr class="separador">
+    <p class="centro">
+      <button class="discreto" id="quitar">Me he liado, quitar el cartel que hay puesto</button>
+    </p>
   </section>
 
   <!-- 3. resultado -->
@@ -221,6 +233,32 @@
         b.disabled = false;
         b.textContent = 'Subir el cartel';
         alert('No se ha podido subir. Revisa la conexión.');
+      });
+  });
+
+  // ---- quitar el cartel que esté puesto
+  $('quitar').addEventListener('click', function () {
+    if (!confirm('¿Quitamos el cartel que hay ahora en la web?\n\nLa web se quedará sin cartel hasta que alguien suba otro.')) return;
+    var b = this;
+    b.disabled = true;
+    b.textContent = 'Quitando…';
+    enviar({ accion: 'quitar', pase: pase })
+      .then(function (r) {
+        if (r.ok) {
+          $('fin-texto').textContent = 'Hecho. La web se queda sin cartel hasta que subáis otro.';
+          mostrar('paso-fin');
+          return;
+        }
+        b.disabled = false;
+        b.textContent = 'Me he liado, quitar el cartel que hay puesto';
+        alert(r.error === 'nada' ? 'No hay ningún cartel puesto ahora mismo.'
+            : r.error === 'pase' ? 'Ha pasado mucho rato. Vuelve a entrar y responde otra vez.'
+            : 'No se ha podido quitar. Inténtalo de nuevo.');
+      })
+      .catch(function () {
+        b.disabled = false;
+        b.textContent = 'Me he liado, quitar el cartel que hay puesto';
+        alert('No se ha podido quitar. Revisa la conexión.');
       });
   });
 

@@ -108,6 +108,7 @@ function doPost(e) {
 
   if (d.accion === 'comprobar') return comprobar(d);
   if (d.accion === 'subir')     return subir(d);
+  if (d.accion === 'quitar')    return quitar(d);
   return responder({ error: 'peticion' });
 }
 
@@ -163,5 +164,61 @@ function subir(d) {
   }
 
   props.setProperty('dia-' + hoy, String(contador + 1));
+  return responder({ ok: true });
+}
+
+/**
+ * Retira el cartel que se está mostrando. No borra el historial:
+ * quita el último archivo subido, y la web deja de enseñar nada
+ * hasta que alguien suba otro.
+ */
+function quitar(d) {
+  if (!d.pase || cache().get('pase-' + d.pase) !== '1') return responder({ error: 'pase' });
+  cache().remove('pase-' + d.pase);
+
+  var props = PropertiesService.getScriptProperties();
+  var repo  = props.getProperty('REPO');
+  var base  = 'https://api.github.com/repos/' + repo;
+  var cab   = {
+    Authorization: 'Bearer ' + props.getProperty('TOKEN'),
+    Accept: 'application/vnd.github+json'
+  };
+  var op = { headers: cab, muteHttpExceptions: true };
+
+  // 1. último cambio en la carpeta
+  var r1 = UrlFetchApp.fetch(base + '/commits?path=' + CARPETA + '&per_page=1', op);
+  if (r1.getResponseCode() >= 300) return responder({ error: 'github' });
+  var commits = JSON.parse(r1.getContentText());
+  if (!commits.length) return responder({ error: 'nada' });
+
+  // 2. qué archivo era
+  var r2 = UrlFetchApp.fetch(base + '/commits/' + commits[0].sha, op);
+  if (r2.getResponseCode() >= 300) return responder({ error: 'github' });
+  var archivos = JSON.parse(r2.getContentText()).files || [];
+  var destino = null;
+  for (var i = 0; i < archivos.length; i++) {
+    if (archivos[i].status !== 'removed' &&
+        archivos[i].filename.indexOf(CARPETA + '/') === 0) {
+      destino = archivos[i].filename;
+      break;
+    }
+  }
+  if (!destino) return responder({ error: 'nada' });
+
+  // 3. su identificador, que GitHub exige para borrar
+  var r3 = UrlFetchApp.fetch(base + '/contents/' + destino, op);
+  if (r3.getResponseCode() >= 300) return responder({ error: 'github' });
+  var sha = JSON.parse(r3.getContentText()).sha;
+
+  // 4. fuera
+  var r4 = UrlFetchApp.fetch(base + '/contents/' + destino, {
+    method: 'delete',
+    contentType: 'application/json',
+    headers: cab,
+    payload: JSON.stringify({ message: 'Cartel retirado desde la web', sha: sha }),
+    muteHttpExceptions: true
+  });
+  if (r4.getResponseCode() >= 300) return responder({ error: 'github' });
+
   return responder({ ok: true });
 }
