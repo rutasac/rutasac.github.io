@@ -72,7 +72,10 @@
   .mes h2 { font-size:1.22rem; color:var(--marron); margin:0 0 6px; font-weight:700;
              border-bottom:1px solid var(--linea); padding-bottom:4px; }
   ul { list-style:none; margin:0; padding:0; }
-  .ruta { display:flex; gap:14px; align-items:flex-start; padding:9px 4px; border-bottom:1px dotted var(--linea); }
+  .ruta { display:flex; flex-wrap:wrap; gap:14px; align-items:flex-start; padding:9px 4px; border-bottom:1px dotted var(--linea); }
+  .cartel { flex:0 0 100%; margin:2px 0 0; }
+  .cartel img { display:block; width:100%; height:auto; border-radius:14px; border:1px solid var(--linea); }
+  .ruta.pasada .cartel { display:none; }
   .ruta:last-child { border-bottom:0; }
   .fecha { flex:0 0 46px; text-align:center; line-height:1; padding-top:2px; }
   .fecha b { display:block; font-size:1.35rem; color:var(--verde); font-weight:700; }
@@ -144,6 +147,10 @@
       <li class="ruta" data-date="2026-10-18">
         <div class="fecha"><b>18</b><span>dom</span></div>
         <div class="txt"><p class="nombre">Bacoco – La Lamparona</p></div>
+        <figure class="cartel">
+          <img src="ruta-18-oct.jpg" loading="lazy" width="720" height="548"
+               alt="Ruta Bacoco – La Lamparona, 6 km. Salida de la Plaza del Ayuntamiento a las 9:30. Picoteo: frutos secos, chocolate, fruta.">
+        </figure>
       </li>
     </ul>
   </section>
@@ -277,7 +284,11 @@
   items.forEach(function (li) {
     var p = li.dataset.date.split('-');
     var f = new Date(+p[0], +p[1]-1, +p[2]);
-    if (f < hoy) li.classList.add('pasada');
+    if (f < hoy) {
+      li.classList.add('pasada');
+      var cartel = li.querySelector('.cartel');
+      if (cartel) cartel.remove();
+    }
     else if (!sig) { sig = { li: li, f: f }; }
   });
   if (sig) {
@@ -376,7 +387,8 @@
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
       setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
     });
-    li.appendChild(b);
+    var fig = li.querySelector('.cartel');
+    if (fig) li.insertBefore(b, fig); else li.appendChild(b);
   });
 
   if ('serviceWorker' in navigator) {
