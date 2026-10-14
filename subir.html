@@ -150,8 +150,10 @@
           caja.appendChild(b);
         });
       })
-      .catch(function () {
+      .catch(function (err) {
         $('pregunta').textContent = 'No se ha podido cargar la pregunta. Revisa la conexión y vuelve a entrar.';
+        $('fallo').innerHTML = '<div class="aviso mal" style="font-size:.8rem">Detalle técnico: ' +
+          String(err && err.message ? err.message : err) + '</div>';
       });
   }
 
